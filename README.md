@@ -4,7 +4,7 @@
 
 Pel interprets parentheses expressions (like `(foo 1 2 3)`) as `(operator operands...)` where "operator" is a lambda and "operands" are treated as its arguments. There are no exceptions to this rule; any time you see a parentheses expression, you are free to think about it in terms of calling a lambda with some arguments.
 
-* "Functions" in Pel are just lambdas that are assigned to an Identifier (a "Symbol"). That's why in this text we talk about lambdas and not functions. Anything discussed about lambdas also applies to functions.
+* "Functions" in Pel are just lambdas that are assigned to an identifier (a "Symbol"). That's why in this text we talk about lambdas and not functions. Anything discussed about lambdas also applies to functions.
 
 ### Partial Lambdas
 
@@ -19,7 +19,77 @@ If any of the lambda arguments has a default value (set during lambda definition
 
 ### Closure
 
-The fundamental building block of most Pel expressions is `Closure` which stores a lambda along with some meta data about it. This extra information is what lets Pel "know" if a lambda has become full and is ready to run. `Closure` also keeps track of the environment, always looking up symbols first in the child environment and then in parental environments if the lookup fails.
+The fundamental internal building block of most Pel expressions is `Closure` which stores a lambda along with some meta data about it. This extra information is what lets Pel "know" if a lambda has become full and is ready to run. `Closure` also keeps track of the environment, always looking up symbols first in the child environment and then in parental environments if the lookup fails.
+
+## Creating Lambdas
+
+You can create a lambda as follows:
+
+```
+(lambda [:x :y 12 :z (add1 3)]
+  (sum x y z))
+```
+
+Lambda arguments are written in brackets. Argument names are prefixed with a colon ":", which effectively makes them __keywords__ (see below for more details about Pel keywords). Each argument can have a default value. In the previous example, `:y` is set to 12 and `:z` is set to the result of the expression `(add1 3)`, which is 4.
+
+* When referring to lambda arguments in the body, there's no need to write them as keywords!
+
+## `do` blocks
+
+To run a sequence of expressions after each other, you can use `do`, which is a function that runs each of its arguments and returns the value of the last one. This can be useful when creating lambdas, writing `for` loops, etc.
+
+```
+(lambda [:x :y]
+  (do
+    (print ["inputs are:" x y] " ")
+    (print ["incrementing x:" (+ 1 x)] " ")
+    (+ x y)
+  )
+  3 4)
+
+-> "inputs are: 3 4"
+   "incrementing x: 4"
+   7
+```
+
+A few notes:
+
+* Unlike Python, Pel's `print` function not only displays the result on screen, it also returns it.
+
+* Pel values are __immutable__, therefore, `(+ 1 x)` simply returns `x + 1` and does not update `x` itself.
+
+* In the example above, we immediately applied the lambda to two arguments `3` and `4`. When run, the lambda printed two strings and returned `7` (which we can use later).
+
+## Definitions
+
+Defining functions and constants (because Pel values are immutable) is done via `def`.
+
+```
+(def n 12) -> assigns symbol `n` to value 12
+(def m (+ 3 4)) -> assigns symbol `m` to the expression `(+ 3 4)`
+(def foo (lambda [:x :y 5]
+  (print (+ x y)))) -> assigns symbol `foo` to a lambda expression which prints (and returns) the sum of its arguments
+
+```
+
+* Re-assigning the same symbol to a new value is not allowed.
+
+```
+(def n 12) -> ok
+(def n 14) -> error
+```
+
+## Two Types of Lambdas
+
+Pel lambdas (and functions) can be either strict or non-strict. Strict lambdas evaluate their arguments at the time of call. For example, calling `(print (+ 1 2))`, first the argument `(+ 1 2)` gets evaluated to `3`, and then `print` works with the evaluated value.
+
+Non-strict lambdas, on the other hand, do no necessarily eagerly evaluate their arguments, which makes them "lazy". For example, `(def :name :value)` is a non-strict function that receives AST forms of its arguments, and later chooses to evaluate the `:value` only (because `:name` is a symbol that isn't bound yet).
+
+Therefore, Pel provides an elegant and consistent approach to language design - one that does not special-case any forms (i.e., there are no special forms in Pel). This uniformity also allows for a new way of __meta programming__ without resorting to complex macros, which is on the roadmap for Pel.
+
+## Pipelines
+
+# TODO
 
 ## Basic Data Types
 
