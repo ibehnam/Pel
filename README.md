@@ -79,6 +79,23 @@ Defining functions and constants (because Pel values are immutable) is done via 
 (def n 14) -> error
 ```
 
+## Calling Lambdas
+
+Pel allows positional arguments OR named arguments, but not a mix of both. That means you can call a lambda (or a function) as follows:
+
+```
+(foo :x 3 :y 4) -> named arguments; `:x` and `:y` are the names of the function arguments at the time of definitions
+(foo 3 4) -> positional arguments
+(foo :x 3 4) -> error
+```
+
+* Even Pel's control structures have named arguments. We will talk about them below, but just as an example, you can call a `for` loop in two ways:
+
+```
+(for [1 2 3 4] i (print i)) -> positional arguments
+(for :coll [1 2 3 4] :ioterator i :body (print i)) -> named arguments
+```
+
 ## Two Types of Lambdas
 
 Pel lambdas (and functions) can be either strict or non-strict. Strict lambdas evaluate their arguments at the time of call. For example, calling `(print (+ 1 2))`, first the argument `(+ 1 2)` gets evaluated to `3`, and then `print` works with the evaluated value.
